@@ -7,8 +7,7 @@ from bs4 import BeautifulSoup
 urls = [
     'https://ip.164746.xyz',
     'https://raw.githubusercontent.com/ymyuuu/IPDB/refs/heads/main/BestCF/bestcfv4.txt',
-    'https://raw.githubusercontent.com/ZhiXuanWang/cf-speed-dns/refs/heads/main/ipTop10.html',
-    'https://raw.githubusercontent.com/ymyuuu/IPDB/refs/heads/main/BestCF/bestcfv4.txt',
+    'https://raw.githubusercontent.com/ZhiXuanWang/cf-speed-dns/refs/heads/main/ipTop10.html'，
     'https://raw.githubusercontent.com/ymyuuu/IPDB/refs/heads/main/BestProxy/bestproxy%26country.txt',
     'https://raw.githubusercontent.com/ymyuuu/IPDB/refs/heads/main/BestGC/bestgcv4.txt'
 ]
@@ -39,6 +38,17 @@ def process_html(content):
         ips = extract_ips_from_text(text)
         ip_set.update(ips)
 
+def get_ip_location(ip):
+    try:
+        response = requests.get(f'https://ipinfo.io/{ip}/json', timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        location = data.get('region', 'Unknown') + ', ' + data.get('country', 'Unknown')
+        return location
+    except requests.exceptions.RequestException as e:
+        print(f"无法获取 {ip} 的位置信息，错误: {e}")
+        return 'Unknown'
+
 for url in urls:
     try:
         print(f"正在抓取: {url}")
@@ -56,12 +66,13 @@ for url in urls:
     except Exception as e:
         print(f"处理 URL 时出错: {url}，错误: {e}")
 
-# 将去重后的IP写入文件
+# 获取每个IP的位置信息并写入文件
 with open('ip.txt', 'w', encoding='utf-8') as f:
     for ip in sorted(ip_set):
-        f.write(ip + '\n')
+        location = get_ip_location(ip)
+        f.write(f"{ip} ({location})\n")
 
-print(f"共提取到 {len(ip_set)} 个唯一IP，已保存至 ip.txt")
+print(f"共提取到 {len(ip_set)} 个唯一IP及其所属地区，已保存至 ip.txt")
 
 
 
