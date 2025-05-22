@@ -10,8 +10,7 @@ import chardet
 url_info = [
     {'url': 'https://ip.164746.xyz', 'type': 'html'},
     {'url': 'https://raw.githubusercontent.com/ymyuuu/IPDB/refs/heads/main/BestCF/bestcfv4.txt', 'type': 'text'},
-    {'url': 'https://raw.githubusercontent.com/ZhiXuanWang/cf-speed-dns/refs/heads/main/ipTop10.html', 'type': 'text'},
-    {'url': 'https://raw.githubusercontent.com/yonggekkk/Cloudflare_vless_trojan/refs/heads/main/CF%E4%BC%98%E9%80%89%E5%8F%8D%E4%BB%A3IP(%E7%94%B5%E8%84%91%E7%89%88).zip', 'type': 'zip'}
+    {'url': 'https://raw.githubusercontent.com/ZhiXuanWang/cf-speed-dns/refs/heads/main/ipTop10.html', 'type': 'text'}
 ]
 
 # 正则表达式用于匹配IP地址
