@@ -1,9 +1,10 @@
 name: Update IP List
+
 on:
-  schedule:  # 必须保留这个键名 (不能注释)
+  schedule:
     - cron: '0 */3 * * *'  # 每3小时运行一次
-  workflow_dispatch:  # 允许手动触发 (没有 - 前缀)
-  push:  # 允许提交触发 (需要时取消注释)
+  workflow_dispatch:  # 允许手动触发
+  push:  # 允许提交触发 (如果需要)
 
 jobs:
   update-ip-list:
@@ -20,20 +21,22 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests
-        pip install beautifulsoup4
+        pip install requests beautifulsoup4 chardet
         
     - name: Run script
       run: python ${{ github.workspace }}/collect_ips.py
-        
+      
     - name: Commit and push changes
+      env:
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
         git config --global user.email "tianshideyou@proton.me"
         git config --global user.name "tianshipapa"
+        git remote set-url origin https://${{ env.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }}
         if [ -n "$(git status --porcelain)" ]; then
           git add ip.txt
           git commit -m "Automatic update"
-          git push
+          git push origin HEAD:${{ github.ref }}
         else
           echo "No changes detected, skipping commit."
         fi
