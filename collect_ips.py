@@ -43,10 +43,16 @@ def get_ip_location(ip):
         response = requests.get(f'https://ipinfo.io/{ip}/json', timeout=10)
         response.raise_for_status()
         data = response.json()
-        location = data.get('region', 'Unknown') + ', ' + data.get('country', 'Unknown')
-        return location
+        country = data.get('country', 'Unknown')
+        return country
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP 错误: {e}")
+        return 'Unknown'
     except requests.exceptions.RequestException as e:
-        print(f"无法获取 {ip} 的位置信息，错误: {e}")
+        print(f"请求失败: {e}")
+        return 'Unknown'
+    except Exception as e:
+        print(f"其他错误: {e}")
         return 'Unknown'
 
 for url in urls:
@@ -72,7 +78,7 @@ with open('ip.txt', 'w', encoding='utf-8') as f:
         location = get_ip_location(ip)
         f.write(f"{ip} ({location})\n")
 
-print(f"共提取到 {len(ip_set)} 个唯一IP及其所属地区，已保存至 ip.txt")
+print(f"共提取到 {len(ip_set)} 个唯一IP及其所属国家代码，已保存至 ip.txt")
 
 
 
