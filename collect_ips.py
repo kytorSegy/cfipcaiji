@@ -1,54 +1,59 @@
 import requests
-from bs4 import BeautifulSoup
 import re
 import os
 
-# 目标URL列表
-urls = [
-    'https://ip.164746.xyz',
-    'https://raw.githubusercontent.com/ymyuuu/IPDB/refs/heads/main/BestCF/bestcfv4.txt',
-    'https://raw.githubusercontent.com/ZhiXuanWang/cf-speed-dns/refs/heads/main/ipTop10.html'
+# 目标URL列表及其类型（html/text）
+url_info = [
+    {'url': 'https://ip.164746.xyz', 'type': 'html'},
+    {'url': 'https://raw.githubusercontent.com/ymyuuu/IPDB/refs/heads/main/BestCF/bestcfv4.txt', 'type': 'text'},
+    {'url': 'https://raw.githubusercontent.com/ZhiXuanWang/cf-speed-dns/refs/heads/main/ipTop10.html', 'type': 'text'}
 ]
 
 # 正则表达式用于匹配IP地址
-ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+ip_pattern = r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'
 
-# 检查ip.txt文件是否存在,如果存在则删除它
+# 设置请求头
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0 Safari/537.36'
+}
+
+# 如果ip.txt存在，则删除它
 if os.path.exists('ip.txt'):
     os.remove('ip.txt')
 
-# 创建一个文件来存储IP地址
-with open('ip.txt', 'w') as file:
-    for url in urls:
-        try:
-            # 发送HTTP请求获取网页内容
-            response = requests.get(url)
-            response.raise_for_status()  # 如果响应状态码不是200，抛出异常
-            
-            print(f"Successfully fetched {url}")
-            
-            # 使用BeautifulSoup解析HTML
+# 使用 set 去重存储IP
+ip_set = set()
+
+for info in url_info:
+    url = info['url']
+    content_type = info['type']
+
+    try:
+        print(f"正在抓取: {url}")
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        if content_type == 'html':
+            from bs4 import BeautifulSoup
+
             soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # 根据网站的不同结构找到包含IP地址的元素
-            if url == 'https://ip.164746.xyz':
-                elements = soup.find_all('tr')
-            else:
-                elements = soup.find_all('li')
-            
-            # 遍历所有元素,查找IP地址
+            elements = soup.find_all('tr')  # 只在HTML页面中查找<tr>
             for element in elements:
-                element_text = element.get_text()
-                ip_matches = re.findall(ip_pattern, element_text)
-                
-                # 如果找到IP地址,则写入文件
-                for ip in ip_matches:
-                    file.write(ip + '\n')
-                    
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching {url}: {e}")
+                text = element.get_text()
+                ips = re.findall(ip_pattern, text)
+                ip_set.update(ips)
+        else:
+            # 对于纯文本内容，直接正则提取
+            text = response.text
+            ips = re.findall(ip_pattern, text)
+            ip_set.update(ips)
 
-print('IP地址已保存到ip.txt文件中。')
+    except requests.exceptions.RequestException as e:
+        print(f"请求失败: {url}，错误: {e}")
 
+# 将去重后的IP写入文件
+with open('ip.txt', 'w', encoding='utf-8') as f:
+    for ip in sorted(ip_set):
+        f.write(ip + '\n')
 
-
+print(f"共提取到 {len(ip_set)} 个唯一IP，已保存至 ip.txt")
