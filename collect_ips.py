@@ -43,7 +43,8 @@ URLS = [
     'https://raw.githubusercontent.com/yorkLiu/FreeV2RayNode/refs/heads/main/v2ray.txt',
     'https://raw.githubusercontent.com/mostaghimbot/FreeV2rayConfig/refs/heads/master/subscription_output.txt',
     'https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/hy2.txt',
-    'https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/super-sub.txt'
+    'https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/super-sub.txt',
+    'https://raw.githubusercontent.com/newbeastly/netproxy/refs/heads/main/ip/local/result.csv'
 ]
 
 # 匹配 IPv4 地址的正则表达式
